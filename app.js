@@ -32,11 +32,42 @@ app.get('/select/:table/:column/:query', function(req, res){
     //need to check validation
     dataBaseHandler.selectWithCondition(req,res)
 })
+
+/*
+    A generic sql script with the following structure
+
+    INSERT INTO 'table' (c1,c2,...)
+    VALUES (v1,v2,...)
+*/
 app.post('/insert/:table/:columns/:values', function(req, res){
     //need to check validation
     dataBaseHandler.postWithoutCondition(req,res)
 })
-//
+
+/*
+    A generic sql script with the following structure
+
+    DELETE FROM 'table'
+    WHERE 'condition'
+*/
+app.delete('/delete/:table/:condition', function(req, res){
+    //need to check validation
+    dataBaseHandler.deleteFromdb(req,res)
+})
+
+/*
+    A generic sql script with the following structure
+
+    UPDATE 'table'
+    SET c1=v1, c2=v2, ...
+    WHERE 'condition'
+*/
+app.put('/update/:table/:values/:condition', function(req, res){
+    //need to check validation
+    dataBaseHandler.updateWithoutCondition(req,res)
+})
+
+//This fucntion will invoke the appi request from the code (should be used by the client)
 function httpInvoke(path,kind)
 {
     var options = {
@@ -58,6 +89,7 @@ function httpInvoke(path,kind)
     
 }
 
+//The function above are example of how to use the http invocation
 function getCountryById(id)
 {
     return httpInvoke('/select/countries/*/name='+id,'GET')
