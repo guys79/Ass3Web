@@ -16,7 +16,7 @@ var connectionConfig = {
     userName: 'GJ',
     password: 'hp4pgWjr',
     server: 'asst3webdev.database.windows.net',
-    options: { encrypt: true, database: '' }
+    options: { encrypt: true, database: 'ass3db' }
 };
 
 //create the pool
