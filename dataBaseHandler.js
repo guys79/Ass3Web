@@ -31,11 +31,10 @@ module.exports.selectWithCondition = selectWithCondition
 
 //This function will assemble the query using the table name and column (SELECT)
 function postWithoutCondition(req, res){
-    var parameters=paramHandle(JSON.stringify(req.params.columns));
-    var values=paramHandle(JSON.stringify(req.params.values));
-    console.log(parameters+" fjsdhjkfehkhfkjsakhfkshek")
-    console.log(values+" fjsdhjkfehkhfkjsakhfkshek")
-    DButilsAzure.execQuery("INSERT INTO "+req.params.table+" "+parameters+" "+" VALUES "+values)
+    var parameters=paramHandleColumnNames(JSON.stringify(req.params.columns));
+    var values=paramHandleValues(JSON.stringify(req.params.values));
+    console.log("INSERTINGGGGGGGGGGGGGGGGGGGG   ")
+    DButilsAzure.execQuery("INSERT INTO "+req.params.table+parameters+" VALUES"+values+";")
     .then(function(result){
         res.send(result)
     })
@@ -47,14 +46,31 @@ function postWithoutCondition(req, res){
 
 module.exports.postWithoutCondition = postWithoutCondition
 
-function paramHandle(parameters)
+function paramHandleValues(parameters)
 {
-    var splitted = parameters.split('+')
-    var newParam = "( \""+splitted[0]+"\""
+    var splitted = parameters.split("+")
+    splitted[0] = splitted[0].substring(1)
+    splitted[splitted.length-1] = splitted[splitted.length-1].substring(0,splitted[splitted.length-1].length-1)
+    console.log(splitted)
+    var newParam = ' (\''+splitted[0]+'\''
     for(var i=1; i<splitted.length;i++)
     {
-        newParam=newParam+" ,\""+splitted[i]+"\""
+        newParam=newParam+', \''+splitted[i]+'\''
     }
-    newParam= newParam+" )"
+    newParam= newParam+')'
+    return newParam
+}
+function paramHandleColumnNames(parameters)
+{
+    var splitted = parameters.split("+")
+    splitted[0] = splitted[0].substring(1)
+    splitted[splitted.length-1] = splitted[splitted.length-1].substring(0,splitted[splitted.length-1].length-1)
+    console.log(splitted)
+    var newParam = ' ('+splitted[0]
+    for(var i=1; i<splitted.length;i++)
+    {
+        newParam=newParam+', '+splitted[i]
+    }
+    newParam= newParam+')'
     return newParam
 }

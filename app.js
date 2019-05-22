@@ -32,7 +32,7 @@ app.get('/select/:table/:column/:query', function(req, res){
     //need to check validation
     dataBaseHandler.selectWithCondition(req,res)
 })
-app.get('/insert/:table/:columns/:values', function(req, res){
+app.post('/insert/:table/:columns/:values', function(req, res){
     //need to check validation
     dataBaseHandler.postWithoutCondition(req,res)
 })
@@ -60,14 +60,20 @@ function httpInvoke(path,kind)
 
 function getCountryById(id)
 {
-    return httpInvoke('/select/countries/*/id='+id,'GET')
+    return httpInvoke('/select/countries/*/name='+id,'GET')
 }
 
 module.exports.getCountryById = getCountryById
 
 function insertCountry(name,country)
 {
-    return httpInvoke('/insert/city/name+country_name/'+name+"+"+country,'POST')
+    return httpInvoke('/insert/city/name+country_name/'+name+'+'+country,'POST')
 }
 
 module.exports.insertCountry = insertCountry
+
+
+function getPosintOfInterestByCategory(category)
+{
+    return httpInvoke('/select/countries/*/name='+id,'GET')
+}
