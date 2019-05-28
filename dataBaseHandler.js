@@ -108,6 +108,7 @@ function deleteFromdb(req, res){
 
 module.exports.deleteFromdb = deleteFromdb
 
+///This function will update the database with no condition in the sql query
 function updateWithoutCondition(req, res){
     var values=updateHandleValues(JSON.stringify(req.params.values))
 
@@ -122,6 +123,7 @@ function updateWithoutCondition(req, res){
     })
 }
 
+///This function will update the database with condition(s) in the sql query
 function updateHandleValues(parameters){
     var splitted = parameters.split("+")
     splitted[0] = splitted[0].substring(1)
