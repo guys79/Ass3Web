@@ -1,5 +1,5 @@
 //This function will check fr basic SQL injection
-function checkForbasicSQLInjection(req,res)
+function checkForBasicSQLInjection(req,res)
 {
     //SQL injection keywords
     var keyWords = ['delete','select','insert','update']
@@ -16,7 +16,8 @@ function checkForbasicSQLInjection(req,res)
     return true
 }
 
-//app.get('/select/:table/:column/:query', function(req, res){
+module.exports.checkForBasicSQLInjection =checkForBasicSQLInjection
+
 //This function will allow to select PointOfInterest ONLY by category
 //This function will check if the given query is 'category=
 function isPointOfInterestByCategory(req,res)
@@ -44,17 +45,24 @@ function numberOfCharOccurrences(Str,c)
     INSERT INTO 'table' (c1,c2,...)
     VALUES (v1,v2,...)
 
-app.post('/insert/:table/:columns/:values', function(req, res){*/
-function addToFavoritesByPOIUsername(req,res)
+*/
+/*function addToFavoritesByPOIUsername(req,res)
 {
-    var  split = returnSplit(req.params)
+    var  splitParam = returnSplit(req.params.cloumns)
+    var  splitValue = returnSplit(req.params.values)
 
-    if(split.length!=2)
+    if(splitParam.length!=2 || splitValue.length!=2)
         return false
 
+    var index =-1
+
+    for(var i=0; i<splitParam.length;i++)
+    {
+        index = splitParam.indexOf()
+    }
     //Continue
     //Check If the give params are POI and Username
-}
+}*/
 function returnSplit(parameters)
 {
     var splitted = parameters.split("+")

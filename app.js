@@ -3,6 +3,8 @@ var app = express();//The app
 var DButilsAzure = require('./DButils');//The db utils
 var dataBaseHandler = require('./dataBaseHandler')//The db handler
 var http = require('http')//The http module
+var validation= require('validation.js')
+
 
 var port = 3000;//The port we listen to
 app.listen(port, function () {
@@ -88,6 +90,42 @@ function httpInvoke(path,kind)
       return ans
     
 }
+
+//Check for sql injection
+app.use('/select', function(req,res,next)
+    {
+        if(validation.checkForBasicSQLInjection(res,req))
+            next()
+        res.status(400)
+    }
+)
+
+//Check for sql injection
+app.use('/delete', function(req,res,next)
+    {
+        if(validation.checkForBasicSQLInjection(res,req))
+            next()
+        res.status(400)
+    }
+)
+
+//Check for sql injection
+app.use('/update', function(req,res,next)
+    {
+        if(validation.checkForBasicSQLInjection(res,req))
+            next()
+        res.status(400)
+    }
+)
+
+//Check for sql injection
+app.use('/insert', function(req,res,next)
+    {
+        if(validation.checkForBasicSQLInjection(res,req))
+            next()
+        res.status(400)
+    }
+)
 
 //The function above are example of how to use the http invocation
 function getCountryById(id)
