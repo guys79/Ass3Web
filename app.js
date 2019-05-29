@@ -41,15 +41,27 @@ app.get('/select/:table/:column', function(req, res){
     FROM 'table'
     WHERE 'query'
 */
+//isPointOfInterestByCategory
+//getReviewByPOI
+//getRankByPOI
+//getPOIByName
 app.get('/select/:table/:column/:query', function(req, res){
     
-   //The consitions should look like this (just an example.. not the right syntax)
-   //if(table == poi)
-   //   if(all the consitions we want to test)
-    //      summon the dataBadeHandler function
-    //  else
-    //      return error            
-    if(validation.getRankByPOI(req,res))
+    var flag = false
+
+    //If the table is pointOfInterest
+    if(JSON.stringify(req.params.table)==='pointOfInterest')
+    {
+        flag = validation.isPointOfInterestByCategory(req,res) || validation.getRankByPOI(req,res) || validation.getPOIByName(req,res)
+    }
+    else
+    {
+        //If the table is reviews
+        if(JSON.stringify(req.params.table)==='reviews')
+            flag = validation.getReviewByPOI(req,res)
+    }
+
+    if(flag)
         dataBaseHandler.selectWithCondition(req,res)
     else
         res.status(400).send("something went wrong with the request")

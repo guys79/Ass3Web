@@ -109,12 +109,19 @@ function getRankByPOI(req,res)
     console.log(checkTable(req,'pointOfInterest'))
     return onlyBy(req,'name',true) && checkColumn(req,'rank') && checkTable(req,'pointOfInterest')
 }
-
+module.exports.getRankByPOI = getRankByPOI
+//This function checks if the syntax for getPOIStatistics
+function getPOIByName(req,res)
+{
+    //console.log(onlyBy(req,'name',true))
+    //console.log(checkTable(req,'pointOfInterest'))
+    return onlyBy(req,'name',true) && checkTable(req,'pointOfInterest')
+}
+module.exports.getPOIByName = getPOIByName
 //This function checks if the given column name in the request is the same as the given 'columnName'
 function checkColumn(req,columnName)
 {
-    console.log(JSON.stringify(req.params.column))
-    console.log(columnName)
+    
     return JSON.stringify(req.params.column) === ('\"'+columnName+'\"')
 }
 
@@ -124,7 +131,7 @@ function checkTable(req,tableName)
     return JSON.stringify(req.params.table) === ('\"'+tableName+'\"')
 }
 
-module.exports.getRankByPOI = getRankByPOI
+
 
 //This function checks if condition is as followes:
 // 'column=value'
@@ -139,5 +146,5 @@ function onlyBy(req,column,flag)
     console.log(/\d/.test(squery))
     console.log(squery.charAt(column.length+1))
     console.log(squery)*/
-    return squery.substring(1,column.length+1)===column && (!flag|| (/\d/.test(squery))) && squery.charAt(column.length+1)==='='
+    return squery.substring(1,column.length+1)===column && (!flag || !(/\d/.test(squery))) && squery.charAt(column.length+1)==='='
 }
