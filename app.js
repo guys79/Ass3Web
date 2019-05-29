@@ -4,6 +4,11 @@ var DButilsAzure = require('./DButils');//The db utils
 var dataBaseHandler = require('./dataBaseHandler')//The db handler
 var http = require('http')//The http module
 var validation= require('validation.js')
+const jwt = require("jsonwebtoken");
+
+app.use(express.json());
+
+secret = "yonatanGuy";
 
 
 var port = 3000;//The port we listen to
@@ -18,6 +23,9 @@ app.listen(port, function () {
     FROM 'table'
 
 */
+
+
+
 app.get('/select/:table/:column', function(req, res){
     //need to check validation
     dataBaseHandler.selectWithoutCondition(req,res)
@@ -68,6 +76,30 @@ app.put('/update/:table/:values/:condition', function(req, res){
     //need to check validation
     dataBaseHandler.updateWithoutCondition(req,res)
 })
+
+app.post("/login/:UserName/:passward", (req, res) => {
+    payload = { id: req.params.UserName, name: req.params.UserName, admin: true };
+    options = { expiresIn: "1d" };
+    const token = jwt.sign(payload, secret, options);
+    res.send(token);
+});
+
+app.post("/private", (req, res) => {
+    const token = req.header("x-auth-token");
+    // no token
+    if (!token) res.status(401).send("Access denied. No token provided.");
+    // verify token
+    try {
+        const decoded = jwt.verify(token, secret);
+        req.decoded = decoded;
+        if (req.decoded.admin)
+            res.status(200).send({ result: "Hello admin." });
+        else
+            res.status(200).send({ result: "Hello user." });
+    } catch (exception) {
+        res.status(400).send("Invalid token.");
+    }
+});
 
 //This fucntion will invoke the appi request from the code (should be used by the client)
 function httpInvoke(path,kind)
@@ -127,6 +159,18 @@ app.use('/insert', function(req,res,next)
     }
 )
 
+app.use('/login', function(req,res,next)
+    {
+        if(validation.checkForBasicSQLInjection(res,req))
+            next()
+        res.status(400)
+    }
+)
+
+
+
+
+
 //The function above are example of how to use the http invocation
 function getCountryById(id)
 {
@@ -141,7 +185,6 @@ function insertCountry(name,country)
 }
 
 module.exports.insertCountry = insertCountry
-
 
 function getPosintOfInterestByCategory(category)
 {
