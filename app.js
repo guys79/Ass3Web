@@ -1,14 +1,17 @@
+//node Desktop/a/app.js
 var express = require('express');//The express module
 var app = express();//The app
 var DButilsAzure = require('./DButils');//The db utils
 var dataBaseHandler = require('./dataBaseHandler')//The db handler
 var http = require('http')//The http module
-var validation= require('validation.js')
+const validation= require('./validation')
 const jwt = require("jsonwebtoken");
 
 app.use(express.json());
-
 secret = "yonatanGuy";
+
+
+
 
 
 var port = 3000;//The port we listen to
@@ -39,8 +42,17 @@ app.get('/select/:table/:column', function(req, res){
     WHERE 'query'
 */
 app.get('/select/:table/:column/:query', function(req, res){
-    //need to check validation
-    dataBaseHandler.selectWithCondition(req,res)
+    
+   //The consitions should look like this (just an example.. not the right syntax)
+   //if(table == poi)
+   //   if(all the consitions we want to test)
+    //      summon the dataBadeHandler function
+    //  else
+    //      return error            
+    if(validation.getRankByPOI(req,res))
+        dataBaseHandler.selectWithCondition(req,res)
+    else
+        res.status(400).send("something went wrong with the request")
 })
 
 /*
@@ -123,49 +135,6 @@ function httpInvoke(path,kind)
     
 }
 
-//Check for sql injection
-app.use('/select', function(req,res,next)
-    {
-        if(validation.checkForBasicSQLInjection(res,req))
-            next()
-        res.status(400)
-    }
-)
-
-//Check for sql injection
-app.use('/delete', function(req,res,next)
-    {
-        if(validation.checkForBasicSQLInjection(res,req))
-            next()
-        res.status(400)
-    }
-)
-
-//Check for sql injection
-app.use('/update', function(req,res,next)
-    {
-        if(validation.checkForBasicSQLInjection(res,req))
-            next()
-        res.status(400)
-    }
-)
-
-//Check for sql injection
-app.use('/insert', function(req,res,next)
-    {
-        if(validation.checkForBasicSQLInjection(res,req))
-            next()
-        res.status(400)
-    }
-)
-
-app.use('/login', function(req,res,next)
-    {
-        if(validation.checkForBasicSQLInjection(res,req))
-            next()
-        res.status(400)
-    }
-)
 
 
 
