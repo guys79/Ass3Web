@@ -5,7 +5,7 @@ function checkForBasicSQLInjection(req,res)
     //SQL injection keywords
     var keyWords = ['delete','select','insert','update']
 
-    console.log(req.params)
+    
     //Go through all of the request parameters and check for those keywords
     for(var i=0;i<req.params.length;i++)
     {
@@ -59,31 +59,6 @@ function addToFavoritesByPOIUsername(req,res)
     //Continue
     //Check If the give params are POI and Username
 }
-//Untested
-function returnSplit(parameters)
-{
-    var splitted = parameters.split("+")
-    
-    splitted[0] = splitted[0].substring(1)
-    splitted[splitted.length-1] = splitted[splitted.length-1].substring(0,splitted[splitted.length-1].length-1)
-    
-    if (isNaN(splitted[0])) 
-    {
-        splitted[0] = '\''+splitted[0]+'\''
-    }
-    
-    for(var i=0; i<splitted.length;i++)
-    {
-        
-        if (isNaN(splitted[i])) 
-        {
-            splitted[i] = '\''+splitted[i]+'\''
-        }
-        
-    }
-    
-    return newParam
-}
 
 //This function will allow to select PointOfInterest ONLY by category
 //This function will check if the given query is 'category=
@@ -104,13 +79,6 @@ function getReviewByPOI(req,res)
 module.exports.getReviewByPOI = getReviewByPOI
 
 
-
-
-
-
-
-
-
 //This function checks if the syntax for getReviewById is correct
 function getSelectedPhotos(req,res)
 {
@@ -121,9 +89,7 @@ module.exports.getSelectedPhotos = getSelectedPhotos
 //This function checks if the syntax for getReviewByPOI is correct
 function getRankByPOI(req,res)
 {
-    /*console.log(onlyBy(req,'name')+" ljljdasl")
-    console.log(checkColumn(req,'rank'))
-    console.log(checkTable(req,'pointOfInterest'))*/
+   
     return onlyBy(req,'name',true) && checkColumn(req,'rank') && checkTable(req,'pointOfInterest')
 }
 module.exports.getRankByPOI = getRankByPOI
@@ -140,8 +106,7 @@ module.exports.getQuestionAndAnswersByUsername =getQuestionAndAnswersByUsername
 //This function checks if the syntax for getPOIStatistics
 function getPOIByName(req,res)
 {
-    //console.log(onlyBy(req,'name',true))
-    //console.log(checkTable(req,'pointOfInterest'))
+   
     return onlyBy(req,'name',true) && checkTable(req,'pointOfInterest')
 }
 module.exports.getPOIByName = getPOIByName
@@ -168,11 +133,7 @@ function onlyBy(req,column,flag)
     var squery = JSON.stringify(req.params.query)
     if(squery.length<=column.length+4)
         return false
-    /*console.log(squery.substring(1,column.length+1))
-    console.log(column)
-    console.log(/\d/.test(squery))
-    console.log(squery.charAt(column.length+1))
-    console.log(squery)*/
+  
     return squery.substring(1,column.length+1)===column && (!flag || !(/\d/.test(squery))) && squery.charAt(column.length+1)==='='
 }
 
@@ -205,7 +166,7 @@ function isRemoveFromFavoriets(req,res)
 }
 module.exports.isRemoveFromFavoriets = isRemoveFromFavoriets
 
-'/insert/:table/:columns/:values'
+//This function will check if the column is in the condition
 function isColumnInCondition(req,column)
 {
     var parameters = JSON.stringify(req.params.columns)
@@ -213,23 +174,24 @@ function isColumnInCondition(req,column)
     splitted[0] = splitted[0].substring(1)
     splitted[splitted.length-1] = splitted[splitted.length-1].substring(0,splitted[splitted.length-1].length-1)
 
-    console.log("column "+column)
+  
     for(var i=0;i<splitted.length;i++)
     {
-        console.log('\''+(splitted[i]) +'\'')
+ 
         if(splitted[i]=== column)
             return true
     }
     return false
 }
 
+//This function checks if the syntax for AddReview
 function isAddReview(req,res)
 {
     var columns = JSON.stringify(req.params.columns)
     var splittedP = columns.split("+")
     splittedP[0] = splittedP[0].substring(1)
     splittedP[splittedP.length-1] = splittedP[splittedP.length-1].substring(0,splittedP[splittedP.length-1].length-1)
-    console.log(splittedP.length)
+
     
     if(splittedP.length!=3)
         return false
@@ -247,6 +209,7 @@ function isAddReview(req,res)
 
 module.exports.isAddReview = isAddReview
 
+//This function checks if the syntax for AddPointOfInterest
 function isAddPOI(req,res)
 {
     var columns = JSON.stringify(req.params.columns)
@@ -259,51 +222,25 @@ function isAddPOI(req,res)
     var splittedV = values.split("+")
     splittedV[0] = splittedV[0].substring(1)
     splittedV[splittedV.length-1] = splittedV[splittedV.length-1].substring(0,splittedV[splittedV.length-1].length-1)
-    console.log("not reached")
+
     if(!((splittedP.length== 4 || splittedP.length == 5) && splittedP.length==splittedV.length))
         return false
-    console.log("reached")
-    console.log(isColumnInCondition(req,'name'))
-    console.log(isColumnInCondition(req,'city'))
-    console.log(isColumnInCondition(req,'categoryName'))
-    console.log(isColumnInCondition(req,'description'))
+   
     return isColumnInCondition(req,'name') && isColumnInCondition(req,'city') && isColumnInCondition(req,'categoryName') && isColumnInCondition(req,'description') && checkNumberInValues(splittedV,[splittedP.indexOf('description'),splittedP.indexOf('image')])
 }
 module.exports.isAddPOI= isAddPOI
 
 
-
+//This function checks if the syntax for passwordrestoration
 function getPasswordByQuestionAndAnswer(req,res)
 {
-    /*var squery = JSON.stringify(rea.params.condition)
-    squery = squery.substring(1,squery.length-1)
-    squery = squery.replace(" ","")
-    squery = squery.toLowerCase()
-    split = squery.split("and")
-    var splitValue =[]
-    var splitColumn =[]
-    var index=-1
-    for(var i=0;i<split.length;i++)
-    {
-        index = split[i].indexOf("=")
-        splitColumn.push(split[i].substring(0,index))
-        splitValue.push(split[i].substring(index+1))
 
-    }
-    if(splitColumn.length!=3)
-    {
-        return false
-    }
-    if(splitColumn.length!=splitValue.length)
-    {
-        return false
-    }*/
     return checkTable(req,'users') && isColumnInCondition2(req,'username') && isColumnInCondition2(req,'question') && isColumnInCondition2(req,'answer')
 }
 
 module.exports.getPasswordByQuestionAndAnswer = getPasswordByQuestionAndAnswer
 
-
+//This function checks if there is a number in the given array of string
 function checkNumberInValues(split,indexes)
 {
     for(var i=0;i<split.length;i++)
@@ -315,23 +252,24 @@ function checkNumberInValues(split,indexes)
     return true
 }
 
+//This function will check if the column is in the condition
 function isColumnInCondition2(req,column)
 {
     var parameters = JSON.stringify(req.params.query)
     var splitted = parameters.split("+")
     splitted[0] = splitted[0].substring(1)
     splitted[splitted.length-1] = splitted[splitted.length-1].substring(0,splitted[splitted.length-1].length-1)
-    console.log(parameters)
-    console.log("column "+column)
+   
     for(var i=0;i<splitted.length;i++)
     {
-        console.log(splitted[i].split("=")[0])
+      
         if(splitted[i].split("=")[0]=== column)
             return true
     }
     return false
 }
 
+//This function checks if the syntax for addQuestionAndAnswer
 function isAddQuestionAndAnswer(req,res)
 {
 
@@ -352,3 +290,105 @@ function isAddQuestionAndAnswer(req,res)
     return isColumnInCondition(req,'username') && isColumnInCondition(req,'answer') && isColumnInCondition(req,'question')
 }
 module.exports.isAddQuestionAndAnswer= isAddQuestionAndAnswer
+
+//This function checks if the syntax for addCategory
+function isAddCategory(req,res)
+{
+    var columns = JSON.stringify(req.params.columns)
+    var splittedP = columns.split("+")
+    splittedP[0] = splittedP[0].substring(1)
+    splittedP[splittedP.length-1] = splittedP[splittedP.length-1].substring(0,splittedP[splittedP.length-1].length-1)
+    
+    
+    var values = JSON.stringify(req.params.values)
+    var splittedV = values.split("+")
+    splittedV[0] = splittedV[0].substring(1)
+    splittedV[splittedV.length-1] = splittedV[splittedV.length-1].substring(0,splittedV[splittedV.length-1].length-1)
+
+    if(!(splittedP.length == 1 && splittedP.length==splittedV.length))
+        return false
+
+    return isColumnInCondition(req,'name')
+}
+module.exports.isAddCategory = isAddCategory
+
+
+//This function checks if the syntax for updateRank
+function isUpdateRank(req,res)
+{
+    
+    return checkTable(req,'pointOfInterest') && isColumnEqualToNumber(req,'rank') && isConditionEqualToString(req,'name')
+}
+module.exports.isUpdateRank = isUpdateRank
+
+//This function checks if column='number'
+function isColumnEqualToNumber(req,column)
+{
+    var squery = JSON.stringify(req.params.values)
+    squery = squery.substring(1,squery.length-1)
+    if(squery.length< column.length+1)
+    if(!(column===squery.substring(0,column.length)))
+        return false
+    if(!(squery.charAt(column.length)==='='))
+        return false
+    return !isNaN(Number(squery.substring(column.length+1)))
+}
+
+//This function checks if condition='String'
+function isConditionEqualToString(req,column)
+{
+    var squery = JSON.stringify(req.params.condition)
+    squery = squery.substring(1,squery.length-1)
+    if(squery.length< column.length+1)
+    if(!(column===squery.substring(0,column.length)))
+        return false
+    
+    return !(squery.charAt(column.length)==='=')
+    
+}
+
+
+//This function check the imput of the register
+function isGoodregister(req,res){
+    var flag = false
+        var temp= JSON.stringify(req.params.columns)
+        temp = temp.substring(1,temp.length-1).split("+")
+        if(temp.includes("username")&&temp.includes("first_name")&&temp.includes("last_name")&&temp.includes("city")&&temp.includes("country")
+        &&temp.includes("Email")&&temp.includes("password"))
+        {
+            flag=true
+        }
+        var temp1= JSON.stringify(req.params.values)
+        temp1 = temp1.substring(1,temp1.length-1).split("+")
+        console.log(temp1)
+        for(var i=0;i<temp1.length;i++){
+            if(/\d/.test(temp1[i]))
+            {
+                flag=false
+            }
+        }
+
+        return flag
+}
+
+module.exports.isGoodregister = isGoodregister
+
+//this function will check if the syntax for addfavorites is correct
+function isAddFavorites(req,res)
+{
+    var bool= false
+    var point=JSON.stringify(req.params.values)
+    var temp= point.split('=')
+    temp[0] = temp[0].substring(1)
+    temp[1] = temp[1].substring(0,temp[1].length-1)
+    if(temp[0]==="point_of_interest"&&temp.length==2&&
+    JSON.stringify(req.params.condition).includes("username")&&JSON.stringify(req.params.condition).includes("point_of_interest")){
+        bool=true
+    }
+    return bool
+} 
+
+module.exports.isAddFavorites = isAddFavorites
+
+
+

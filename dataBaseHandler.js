@@ -16,7 +16,7 @@ module.exports. selectWithoutCondition = selectWithoutCondition
 
 //This function will assemble the query using the table name, column and the query (SELECT)
 function selectWithCondition(req, res){
-    console.log(req.params.query)
+
     DButilsAzure.execQuery("SELECT "+req.params.column+" FROM "+req.params.table +" WHERE "+req.params.query+";")
     .then(function(result){
         res.status(200).send(result)
@@ -29,13 +29,75 @@ function selectWithCondition(req, res){
 }
 module.exports.selectWithCondition = selectWithCondition
 
+function handleCategory(req,res)
+{
+    
+    DButilsAzure.execQuery("SELECT MAX( Id ) FROM category;")
+            .then(function(result){
+                
+                DButilsAzure.execQuery("INSERT INTO category (Id, name) VALUES ("+(Number(result[0][''])+ 1) + ", \'"+req.params.values+"\');")
+                .then(function(result2)
+                    {
+                        res.status(201).send(result2)        
+                    }
+                )
+                .catch(function(err){
+                    console.log(err)
+                    res.status(400).send(err)
+                })
+                
+            })
+            .catch(function(err){
+                console.log(err)
+                res.status(400).send(err)
+            })
+
+    
+            
+}
+
+function addRank(req,res)
+{
+    
+    
+    DButilsAzure.execQuery("SELECT rank FROM pointOfInterest WHERE name=\'"+req.params.name+"\';")
+            .then(function(result){
+                
+                DButilsAzure.execQuery("UPDATE pointOfInterest SET rank="+(Number(result[0]['rank'])+ 1)+" WHERE name=\'"+req.params.name+"\';")
+                .then(function(result2)
+                    {
+                        res.status(201).send(result2)        
+                    }
+                )
+                .catch(function(err){
+                    console.log(err)
+                    res.status(400).send(err)
+                })
+                
+            })
+            .catch(function(err){
+                console.log(err)
+                res.status(400).send(err)
+            })
+
+    
+}
+module.exports.addRank = addRank
+
+
 //This function will assemble the query using the table name and column (SELECT)
 function postWithoutCondition(req, res){
+    var table = JSON.stringify(req.params.table)
+    table = table.substring(1,table.length-1)
+    if(table==="category")
+        {
+            handleCategory(req,res)
+            return
+        }
     var parameters=paramHandleColumnNames(JSON.stringify(req.params.columns));
     var values=paramHandleValues(JSON.stringify(req.params.values));
 
-    var table = JSON.stringify(req.params.table)
-    table = table.substring(1,table.length-1)
+    
     if(table === "reviews")
     {
         parameters = parameters.substring(0,parameters.length - 1)+', time)'
@@ -59,11 +121,9 @@ function postWithoutCondition(req, res){
                 values = values.replace("-","/") 
             }
         }
+      
     }
 
-    console.log(parameters)
-    console.log(values)
-    
 
     DButilsAzure.execQuery("INSERT INTO "+req.params.table+parameters+" VALUES"+values+";")
     .then(function(result){
@@ -86,7 +146,7 @@ function paramHandleValues(parameters)
     splitted[splitted.length-1] = splitted[splitted.length-1].substring(0,splitted[splitted.length-1].length-1)
     
     
-    console.log(splitted)
+
     var newParam = ' (\''+splitted[0]+'\''
     if (!isNaN(splitted[0])) 
     {
@@ -115,13 +175,12 @@ function getPasswordFromQAUsername(req,res)
     var username = fetchValue(req,'username')
     var question = fetchValue(req,'question')
     var answer = fetchValue(req,'answer')
-    console.log(("SELECT answer FROM question_and_answer WHERE username="+username+" AND question="+question+";"))
+    
     
     DButilsAzure.execQuery("SELECT answer FROM question_and_answer WHERE username="+username+" AND question="+question+";")  
     .then(function(result){
         if(answer === ('\''+JSON.stringify(result).substring(1,JSON.stringify(result).length-1)+'\''))
         {
-            console.log("SELECT password FROM users WHERE username="+username+";")
             DButilsAzure.execQuery("SELECT password FROM users WHERE username="+username+";")
             .then(function(result2){
                 res.status(200).send(result2)
@@ -163,7 +222,7 @@ function paramHandleColumnNames(parameters)
 
 //This function will assemble the query using the table name and column (SELECT)
 function deleteFromdb(req, res){
-    console.log("DELETE FROM "+req.params.table+" WHERE "+req.params.condition+";")
+    
     DButilsAzure.execQuery("DELETE FROM "+req.params.table+" WHERE "+req.params.condition+";")
     .then(function(result){
         res.status(200).send(result)
@@ -177,11 +236,23 @@ function deleteFromdb(req, res){
 module.exports.deleteFromdb = deleteFromdb
 
 ///This function will update the database with no condition in the sql query
-function updateWithoutCondition(req, res){
+function updateWithCondition(req, res){
     var values=updateHandleValues(JSON.stringify(req.params.values))
 
-    console.log("UPDATE "+req.params.table+" SET "+values+" WHERE "+req.params.condition+";")
-    DButilsAzure.execQuery("UPDATE "+req.params.table+" SET "+values+" WHERE "+req.params.condition+";")
+    var table = JSON.stringify(req.params.table)
+    table  = table.substring(1,table.length-1)
+    if(table==="favorites"){
+        values= values+', date = '+'\''+getCurrentDateInDateTime2Format()+'\''
+    }
+    var where=  updateHandleValues(JSON.stringify(req.params.condition))
+    var temp = where.split(",")
+    where = ""
+    for(var i=0;i<temp.length-1;i++)
+    {
+        where+= temp[i] +" AND"
+    }
+    where+= temp[temp.length-1]
+    DButilsAzure.execQuery("UPDATE "+req.params.table+" SET "+values+" WHERE "+where+";")
     .then(function(result){
         res.status(201).send(result)
     })
@@ -190,6 +261,7 @@ function updateWithoutCondition(req, res){
         res.status(400).send(err)
     })
 }
+
 
 ///This function will update the database with condition(s) in the sql query
 function updateHandleValues(parameters){
@@ -213,7 +285,7 @@ function updateHandleValues(parameters){
     return newParam
 }
 
-module.exports.updateWithoutCondition = updateWithoutCondition
+module.exports.updateWithCondition = updateWithCondition
 
 //This function will return the currentdate in the format YYYY/MM/DD hh:mm:ss
 function getCurrentDateInDateTime2Format()
@@ -225,7 +297,9 @@ function getCurrentDateInDateTime2Format()
        [d.getHours(),
         d.getMinutes(),
         d.getSeconds()].join(':');
-    console.log(dformat)
+   
     return dformat
 
 }
+
+

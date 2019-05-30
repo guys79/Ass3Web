@@ -4,8 +4,8 @@ var app = express();//The app
 var DButilsAzure = require('./DButils');//The db utils
 var dataBaseHandler = require('./dataBaseHandler')//The db handler
 var http = require('http')//The http module
-const validation= require('./validation')
-const jwt = require("jsonwebtoken");
+const validation= require('./validation')//The validation module
+const jwt = require("jsonwebtoken");//The jwt module
 
 app.use(express.json());
 secret = "yonatanGuy";
@@ -27,19 +27,21 @@ app.get('/select/:table/:column', function(req, res){
     var table = JSON.stringify(req.params.table)
     table = table.substring(1,table.length-1)
 
-
+    //If the table is city
     if(table === "city")
     {
         flag = validation.isGetFromCities(req,res)
     }
     else
     {
+        //If the table is category
         if(table === "category")
         {
             flag = validation.isGetFromCategories(req,res)
         }
         else
         {
+            //If the table is countries
             if(table === "countries")
             {
                 flag = validation.isGetFromCountries(req,res)
@@ -66,7 +68,7 @@ app.get('/select/:table/:column/:query', function(req, res){
     var flag = false
     var table = JSON.stringify(req.params.table)
     table = table.substring(1,table.length-1)
-    
+    var stop = false
     var column = JSON.stringify(req.params.column)
     column = column.substring(1,column.length-1)
     //If the table is pointOfInterest
@@ -106,7 +108,7 @@ app.get('/select/:table/:column/:query', function(req, res){
                             if(flag)
                             {
                                     dataBaseHandler.getPasswordFromQAUsername(req,res)
-                                    return
+                                    stop= true
                             }
                         }
                             
@@ -115,11 +117,13 @@ app.get('/select/:table/:column/:query', function(req, res){
             }
         }    
     }
-
-    if(flag)
-        dataBaseHandler.selectWithCondition(req,res)
-    else
-        res.status(400).send("something went wrong with the request")
+    if(!stop)
+    {
+        if(flag)
+            dataBaseHandler.selectWithCondition(req,res)
+        else
+            res.status(400).send("something went wrong with the request")
+    }
 })
 
 /*
@@ -141,16 +145,27 @@ app.post('/insert/:table/:columns/:values', function(req, res){
     }
     else
     {
+        //If the table is pointOfInterest
         if(table === "pointOfInterest")
         {
             flag = validation.isAddPOI(req,res)
         }
         else
         {
+            //If the table is question_and_answer
             if(table=== "question_and_answer")
             {
-                console.log(";alkd;ask")
                 flag = validation.isAddQuestionAndAnswer(req,res)
+            }
+            else
+            {
+                //If the table is category
+                if(table=== "category")
+                {
+                    
+                    flag = validation.isAddCategory(req,res)
+                    
+                }
             }
         }
             
@@ -170,10 +185,10 @@ app.post('/insert/:table/:columns/:values', function(req, res){
 
 */
 app.delete('/delete/:table/:condition', function(req, res){
+    
     if(validation.isRemoveFromFavoriets(req,res))
     {
-        if(JSON.stringify(req.params.table) === "reviews")
-            dataBaseHandler.deleteFromdb(req,res)
+        dataBaseHandler.deleteFromdb(req,res)
     }
     else
         res.status(400).send("something went wrong with the request")
@@ -187,10 +202,54 @@ app.delete('/delete/:table/:condition', function(req, res){
     WHERE 'condition'
 */
 app.put('/update/:table/:values/:condition', function(req, res){
-    //need to check validation
-    dataBaseHandler.updateWithoutCondition(req,res)
+    var flag = false
+    var table = JSON.stringify(req.params.table)
+    table = table.substring(1,table.length-1)
+
+    //If the table is pointOfInterest
+    if(table==="favorites")
+    {
+        flag = validation.isAddFavorites(req,res) 
+        console.log(table)  
+    }
+    else
+    {
+        if(table === "pointOfInterest")
+            dataBaseHandler.updateWithCondition(req,res)
+    }
+    if(flag)
+        dataBaseHandler.updateWithCondition(req,res)
+    else
+        res.status(400).send("something went wrong with the request")
+        
 })
 
+//This function will handle the registration
+app.post('/register/:table/:columns/:values', function(req, res){
+    //need to check validation
+    var flag = false
+    var table = JSON.stringify(req.params.table)
+    table  = table.substring(1,table.length-1)
+    //If the table is pointOfInterest
+    
+    if(table==="users")
+    {
+        flag = validation.isGoodregister(req,res) 
+    }
+    
+
+    else{
+        res.status(400).send("something went wrong with the request")
+    }
+    if(!flag){
+        res.status(400).send("something went wrong with the request")
+    }
+
+    dataBaseHandler.postWithoutCondition(req,res)
+})
+
+
+//Login
 app.post("/login/:UserName/:passward", (req, res) => {
     payload = { id: req.params.UserName, name: req.params.UserName, admin: true };
     options = { expiresIn: "1d" };
