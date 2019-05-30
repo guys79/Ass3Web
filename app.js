@@ -10,10 +10,6 @@ const jwt = require("jsonwebtoken");
 app.use(express.json());
 secret = "yonatanGuy";
 
-
-
-
-
 var port = 3000;//The port we listen to
 app.listen(port, function () {
     console.log('Start listening to port ' + port);
@@ -26,12 +22,36 @@ app.listen(port, function () {
     FROM 'table'
 
 */
-
-
-
 app.get('/select/:table/:column', function(req, res){
-    //need to check validation
-    dataBaseHandler.selectWithoutCondition(req,res)
+    var flag =false
+    var table = JSON.stringify(req.params.table)
+    table = table.substring(1,table.length-1)
+
+
+    if(table === "city")
+    {
+        flag = validation.isGetFromCities(req,res)
+    }
+    else
+    {
+        if(table === "category")
+        {
+            flag = validation.isGetFromCategories(req,res)
+        }
+        else
+        {
+            if(table === "countries")
+            {
+                flag = validation.isGetFromCountries(req,res)
+            }
+        }
+        
+    }
+    
+    if(flag)
+        dataBaseHandler.selectWithoutCondition(req,res)
+    else
+        res.status(400).send("something went wrong with the request")
 })
 
 /*
@@ -41,24 +61,59 @@ app.get('/select/:table/:column', function(req, res){
     FROM 'table'
     WHERE 'query'
 */
-//isPointOfInterestByCategory
-//getReviewByPOI
-//getRankByPOI
-//getPOIByName
 app.get('/select/:table/:column/:query', function(req, res){
     
     var flag = false
-
+    var table = JSON.stringify(req.params.table)
+    table = table.substring(1,table.length-1)
+    
+    var column = JSON.stringify(req.params.column)
+    column = column.substring(1,column.length-1)
     //If the table is pointOfInterest
-    if(JSON.stringify(req.params.table)==='pointOfInterest')
+    if(table==="pointOfInterest")
     {
+    
         flag = validation.isPointOfInterestByCategory(req,res) || validation.getRankByPOI(req,res) || validation.getPOIByName(req,res)
     }
     else
     {
         //If the table is reviews
-        if(JSON.stringify(req.params.table)==='reviews')
+        if(table==="reviews")
+        {
             flag = validation.getReviewByPOI(req,res)
+            
+        }
+        else
+        {
+            //If the table is cityImg
+            if(table ==="cityImg")
+            {
+                flag = validation.getSelectedPhotos(req,res)
+            }
+            else
+            {
+                //If the table is question_and_answer
+                if(table === "question_and_answer")
+                    flag = validation.getQuestionAndAnswersByUsername(req,res)
+                else
+                {
+                    //If the table is users
+                    if(table === "users")
+                    {
+                        if(column ==="password")
+                        {
+                            flag = validation.getPasswordByQuestionAndAnswer(req,res)
+                            if(flag)
+                            {
+                                    dataBaseHandler.getPasswordFromQAUsername(req,res)
+                                    return
+                            }
+                        }
+                            
+                    }
+                }
+            }
+        }    
     }
 
     if(flag)
@@ -74,8 +129,37 @@ app.get('/select/:table/:column/:query', function(req, res){
     VALUES (v1,v2,...)
 */
 app.post('/insert/:table/:columns/:values', function(req, res){
-    //need to check validation
-    dataBaseHandler.postWithoutCondition(req,res)
+    
+    var flag = false
+    var table = JSON.stringify(req.params.table)
+    table = table.substring(1,table.length-1)
+    
+    //If the table is pointOfInterest
+    if(table==="reviews")
+    {
+        flag = validation.isAddReview(req,res)
+    }
+    else
+    {
+        if(table === "pointOfInterest")
+        {
+            flag = validation.isAddPOI(req,res)
+        }
+        else
+        {
+            if(table=== "question_and_answer")
+            {
+                console.log(";alkd;ask")
+                flag = validation.isAddQuestionAndAnswer(req,res)
+            }
+        }
+            
+        
+    }
+    if(flag)
+        dataBaseHandler.postWithoutCondition(req,res)
+    else
+        res.status(400).send("something went wrong with the request")
 })
 
 /*
@@ -83,10 +167,16 @@ app.post('/insert/:table/:columns/:values', function(req, res){
 
     DELETE FROM 'table'
     WHERE 'condition'
+
 */
 app.delete('/delete/:table/:condition', function(req, res){
-    //need to check validation
-    dataBaseHandler.deleteFromdb(req,res)
+    if(validation.isRemoveFromFavoriets(req,res))
+    {
+        if(JSON.stringify(req.params.table) === "reviews")
+            dataBaseHandler.deleteFromdb(req,res)
+    }
+    else
+        res.status(400).send("something went wrong with the request")
 })
 
 /*
@@ -145,29 +235,4 @@ function httpInvoke(path,kind)
     
       return ans
     
-}
-
-
-
-
-
-
-//The function above are example of how to use the http invocation
-function getCountryById(id)
-{
-    return httpInvoke('/select/countries/*/name='+id,'GET')
-}
-
-module.exports.getCountryById = getCountryById
-
-function insertCountry(name,country)
-{
-    return httpInvoke('/insert/city/name+country_name/'+name+'+'+country,'POST')
-}
-
-module.exports.insertCountry = insertCountry
-
-function getPosintOfInterestByCategory(category)
-{
-    return httpInvoke('/select/countries/*/name='+id,'GET')
 }
